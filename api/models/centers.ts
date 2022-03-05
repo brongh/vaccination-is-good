@@ -19,6 +19,7 @@ const slotsSubSchema = new mongoose.Schema({
       return false;
     },
   },
+  active: { type: Boolean, default: true },
 });
 
 slotsSubSchema.index(
@@ -40,4 +41,6 @@ const centerSchema = new mongoose.Schema(
   }
 );
 
-centerSchema.virtual("availableSlots").get(function () {});
+centerSchema.virtual("availableSlots").get(function () {
+  const;
+});
