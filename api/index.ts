@@ -8,11 +8,9 @@ import router from "./controllers";
 
 const startServer = async () => {
   const app = express();
-
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(cors());
-  app.use(helmet());
 
   await mongoose.connect("mongodb://localhost:27017/vaccine");
 

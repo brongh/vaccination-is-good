@@ -14,83 +14,81 @@ import {
 import { Link } from 'react-router-dom';
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
+import { instance } from "../../services/api";
 
-function getBooking() {
-  return [
-    {
-      id: 1,
-      name: "Tan Ah Kow",
-      centerName: "Bukit Timah CC",
-      centerId: 3,
-      startTime: new Date("2021-12-01T09:00:00"),
-    },
-    {
-      id: 2,
-      name: "Jean Lee Ah Meow",
-      centerName: "Bukit Timah CC",
-      centerId: 3,
-      startTime: new Date("2021-12-01T10:00:00"),
-    },
-    {
-      id: 3,
-      name: "Lew Ah Boi",
-      centerName: "Bukit Timah CC",
-      centerId: 3,
-      startTime: new Date("2021-12-01T11:00:00"),
-    },
-  ];
-}
+const VaccineRegistrationListing = () => {
+  const [data, setData] = useState()
+  const [deleted, setDeleted] = useState(false)
 
-export class VaccineRegistrationListing extends Component {
-  render() {
-    return (
-      <React.Fragment>
-        <CssBaseline />
-        <Container>
-          <Box sx={{mt: 8}}>
-            <Typography component="h1" variant="h5">
-              Active Booking
-            </Typography>
-            <TableContainer component={Box}>
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell align="left">Center Name</TableCell>
-                    <TableCell align="left">Start Time</TableCell>
-                    <TableCell align="left">&nbsp;</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {getBooking().map((row) => (
+  useEffect(() => {
+    instance.get("/bookings/slots").then((res) => {
+      setData(res.data)
+    })
+  }, [deleted])
+
+  const handleDelete = async (bookingId, userId) => {
+    console.log(bookingId, userId)
+    await instance.delete(`/bookings/user?bookingId=${bookingId}&userId=${userId}`).then((res) => {
+      if (res.data.message === "Success") {
+        setDeleted(!deleted)
+
+      }
+    })
+  }
+
+  return (
+    <React.Fragment>
+      <CssBaseline />
+      <Container>
+        <Box sx={{ mt: 8 }}>
+          <Typography component="h1" variant="h5">
+            Active Booking
+          </Typography>
+          <TableContainer component={Box}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell align="left">Center Name</TableCell>
+                  <TableCell align="left">Start Time</TableCell>
+                  <TableCell align="left">&nbsp;</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data && data.map((row, index) => {
+                  const time = new Date(row.timeSlot)
+                  return (
                     <TableRow
-                      key={row.id}
+                      key={index}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
-                        {row.name}
+                        {row.patient.name}
                       </TableCell>
-                      <TableCell align="left">{row.centerName}</TableCell>
+                      <TableCell align="left">{row.center.name}</TableCell>
                       <TableCell align="left">
-                        {row.startTime.toString()}
+                        {time.toString()}
                       </TableCell>
                       <TableCell align="left">
-                        <Button component={Link} to='/bookings/1'>
+                        <Button component={Link} to={`/bookings/${row._id}`}>
                           <ModeEditIcon />
                         </Button>
-                        <Button>
+                        <Button onClick={() => handleDelete(row._id, row.patient._id)}>
                           <DeleteIcon />
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        </Container>
-      </React.Fragment>
-    );
-  }
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </Container>
+    </React.Fragment>
+  );
 }
+
+export default VaccineRegistrationListing
+
